@@ -47,6 +47,17 @@ def draw_line(height):
     pygame.draw.line(SCREEN, COLOR_RED, (0, height), (WINDOW_WIDTH, height), 2)
 
 
+def derive_parabola(x_f, y_f, y_d):
+    global SCREEN
+    # a parabola can be considered as a combination of a directrix and focus
+    # for the time being, our directix is the cursor position
+    local_points = []
+    for x in range(0, WINDOW_WIDTH):
+        y = ((x - x_f)**2)/(2*(y_f - y_d)) + ((y_f + y_d)/2) 
+        local_points.append((x, y))
+
+    pygame.draw.lines(SCREEN, COLOR_GREEN, False, local_points)
+
 def main():
     global SCREEN, CLOCK, WINDOW_HEIGHT, WINDOW_WIDTH, POINTS
     pygame.init()
@@ -58,6 +69,9 @@ def main():
 
     i = 0
     POINTS = []
+
+    FOCUS = (200, 100)
+    POINTS.append(FOCUS)
     
     # generate_random_points()
 
@@ -79,7 +93,10 @@ def main():
             update()
 
             cursor_position = pygame.mouse.get_pos()
-            draw_line(cursor_position[1])
+            y = cursor_position[1]
+            draw_line(y)
+            # if y != FOCUS[1]:
+            derive_parabola(FOCUS[0], FOCUS[1], y)
 
             pygame.display.update()
 
