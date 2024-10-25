@@ -1,6 +1,6 @@
 import pygame
 import random
-from pygame.locals import QUIT, KEYDOWN, K_r, K_s
+from pygame.locals import QUIT, KEYDOWN, K_r, K_s, K_ESCAPE
 
 import sys
 
@@ -34,6 +34,13 @@ def update():
         draw_circle_alpha(COLOR_BLACK, (x,y), 10, 255)
 
 
+def generate_random_points():
+    global POINTS
+    for _ in range(10):
+        x = random.randint(0, WINDOW_HEIGHT)
+        y = random.randint(0, WINDOW_WIDTH)
+        POINTS.append((x, y))
+
 def main():
     global SCREEN, CLOCK, WINDOW_HEIGHT, WINDOW_WIDTH, POINTS
     pygame.init()
@@ -46,10 +53,7 @@ def main():
     i = 0
     POINTS = []
     
-    for _ in range(10):
-        x = random.randint(0, WINDOW_HEIGHT)
-        y = random.randint(0, WINDOW_WIDTH)
-        POINTS.append((x, y))
+    generate_random_points()
 
     while True:
         for event in pygame.event.get():
@@ -59,7 +63,10 @@ def main():
 
             elif event.type == KEYDOWN:
                 if event.key == K_r:
-                    pass
+                    POINTS = []
+                    generate_random_points()
+                elif event.key == K_ESCAPE:
+                    sys.exit()
 
             SCREEN.fill(COLOR_WHITE)
             update()
