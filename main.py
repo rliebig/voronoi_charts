@@ -28,6 +28,7 @@ def draw_circle_alpha(color, center, radius, alpha):
     pygame.draw.circle(shape_surf, color, (radius, radius), radius)
     SCREEN.blit(shape_surf, target_rect)
 
+
 def update():
     global POINTS
     for x,y in POINTS:
@@ -41,6 +42,11 @@ def generate_random_points():
         y = random.randint(0, WINDOW_WIDTH)
         POINTS.append((x, y))
 
+def draw_line(height):
+    global SCREEN
+    pygame.draw.line(SCREEN, COLOR_RED, (0, height), (WINDOW_WIDTH, height), 2)
+
+
 def main():
     global SCREEN, CLOCK, WINDOW_HEIGHT, WINDOW_WIDTH, POINTS
     pygame.init()
@@ -53,7 +59,7 @@ def main():
     i = 0
     POINTS = []
     
-    generate_random_points()
+    # generate_random_points()
 
     while True:
         for event in pygame.event.get():
@@ -64,12 +70,17 @@ def main():
             elif event.type == KEYDOWN:
                 if event.key == K_r:
                     POINTS = []
-                    generate_random_points()
+                    # generate_random_points()
+                # elif event.key == K_s:
                 elif event.key == K_ESCAPE:
                     sys.exit()
 
             SCREEN.fill(COLOR_WHITE)
             update()
+
+            cursor_position = pygame.mouse.get_pos()
+            draw_line(cursor_position[1])
+
             pygame.display.update()
 
 if __name__ == "__main__":
