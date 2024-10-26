@@ -71,11 +71,17 @@ def main():
     POINTS = []
 
     FOCUS = (200, 100)
+    SECOND_FOCUS = (700, 100)
     POINTS.append(FOCUS)
+    POINTS.append(SECOND_FOCUS)
+
+    BEACH_LINE = []
+    WATCHED_ENDPOINTS = []
     
     # generate_random_points()
 
     while True:
+        SCREEN.fill(COLOR_WHITE)
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
@@ -85,20 +91,27 @@ def main():
                 if event.key == K_r:
                     POINTS = []
                     # generate_random_points()
-                # elif event.key == K_s:
+                elif event.key == K_s:
+
+                    i += 1
                 elif event.key == K_ESCAPE:
                     sys.exit()
 
-            SCREEN.fill(COLOR_WHITE)
-            update()
+        cursor_position = pygame.mouse.get_pos()[1]
+        # visualiation basic code
+        update()
+        draw_line(cursor_position)
+        # actual working of the main part
+        for point in POINTS:
+            if cursor_position == point[1]:
+                WATCHED_ENDPOINTS.append(point)
 
-            cursor_position = pygame.mouse.get_pos()
-            y = cursor_position[1]
-            draw_line(y)
-            # if y != FOCUS[1]:
-            derive_parabola(FOCUS[0], FOCUS[1], y)
+        for point in WATCHED_ENDPOINTS:
+            if cursor_position != point[1]:
+                derive_parabola(point[0], point[1], cursor_position)
 
-            pygame.display.update()
+
+        pygame.display.update()
 
 if __name__ == "__main__":
     main()
