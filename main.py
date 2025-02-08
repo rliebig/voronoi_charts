@@ -1,10 +1,10 @@
 import pygame
 import random
 from pygame.locals import QUIT, KEYDOWN, K_r, K_s, K_ESCAPE
-from enum import Enum
 from utilities import COLOR_OFFWHITE, COLOR_RED, COLOR_GREEN, COLOR_BLUE, COLOR_YELLOW, COLOR_GREY, COLOR_BLACK, COLOR_WHITE
+from enum import Enum
 # make local imports verbose
-from .Ort import Ort
+from Ort import Ort, ORT_STATE
 
 import sys
 
@@ -45,15 +45,19 @@ def derive_parabola(x_f, y_f, y_d):
     return local_points
     # pygame.draw.lines(SCREEN, COLOR_GREEN, False, local_points)
 
+# German: Wellenstueck
+class WavePiece():
+    def __init__(self, point, previous, following):
+        self.point = point
+        self.previous = previous
+        self.following = following
 
 class Beachline():
     items = []
     collisions = []
     def __init__(self, size=WINDOW_WIDTH):
         # initialize empty array
-        self.items = [[0, 0] for x in range(WINDOW_WIDTH+1)] 
-        self.collisions = list()
-        self.collided_wellenstuecke = list()
+        self k
 
     def reset_collisions(self):
         self.collision = list()
@@ -79,8 +83,32 @@ class Beachline():
     def get_collisions(self):
         return self.collisions
 
+
+# literal names from course text
+class EVENT_ENUM(Enum):
+    POINT_EVENT = 1
+    SPIKE_EVENT = 2
+
+class Event():
+    def __init__(self, event_type, time, point, old_wave_piece=None):
+        if event_type not in EVENT_ENUM:
+            raise Error("Invalid Argument!")
+
+        self.event_type = event_type
+        self.time = time
+        self.point = point
+        if old_wave_piece:
+            self.old_wave_piece = old_wave_piece
+
+class SweepStatusStructure():
+    def __init__(self):
+        self.events = [] # would correctly be a different structure, but oh well
+
+    def add_event(self):
+
+
 def main():
-    global SCREEN, CLOCK, WINDOW_HEIGHT, WINDOW_WIDTH, POINTS, GLOBAL_SET
+    global SCREEN, CLOCK, WINDOW_HEIGHT, WINDOW_WIDTH, POINTS
     pygame.init()
     # pygame.font.init()
     SCREEN = pygame.display.set_mode((WINDOW_HEIGHT, WINDOW_WIDTH))
@@ -111,8 +139,6 @@ def main():
                     generate_random_points() 
                     permanent_points = []
                     BEACH_LINE = Beachline()
-                    GLOBAL_SET.clear()
-                    # GLOBAL_SET = set() 
                 elif event.key == K_s:
                     if not MOUSE_MODE:
                         cursor_position += 1
@@ -133,7 +159,7 @@ def main():
                 point.state = ORT_STATE.ACTIVE
                 global_toggle = True
 
-            point.draw()
+            point.draw(SCREEN)
                 
 
         # lets introduce logic for the spike line 
