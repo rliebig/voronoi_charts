@@ -1,7 +1,8 @@
 import pygame
 import random
-from pygame.locals import QUIT, KEYDOWN, K_r, K_s, K_ESCAPE
+from pygame.locals import QUIT, KEYDOWN, K_r, K_s, K_ESCAPE, K_t
 from enum import Enum
+from copy import deepcopy
 
 import sys
 
@@ -115,7 +116,9 @@ class Beachline():
             global GLOBAL_SET
             # ensure only one collision per round! 
             for collided in self.collided_wellenstuecke:
-                if L == collided[0] and self.items[y][1] == collided[1]:
+
+                if  self.items[y][1] == collided[1]:
+                # if L == collided[0] and self.items[y][1] == collided[1]:
                     return False
             self.collisions.append([y,x])
 
@@ -127,9 +130,14 @@ class Beachline():
                 self.collided_wellenstuecke.append([self.items[y][1], L])
                 target_string = f"{elem}_{L}"
 
+             
             if not target_string in GLOBAL_SET:
                 GLOBAL_SET[target_string] = [[y,x]]
             else:
+                values = GLOBAL_SET[target_string]
+                for val in values:
+                    if val[0] == y:
+                        return False
                 GLOBAL_SET[target_string].append([y,x])
           
 
@@ -183,6 +191,12 @@ def main():
                     BEACH_LINE = Beachline()
                     GLOBAL_SET.clear()
                     # GLOBAL_SET = set() 
+                elif event.key == K_t:
+                    cursor_position = 0
+                    WATCHED_ENDPOINTS = []
+                    permanent_points = []
+                    BEACH_LINE = Beachline()
+                    GLOBAL_SET.clear()
                 elif event.key == K_s:
                     if not MOUSE_MODE:
                         cursor_position += 1
@@ -201,6 +215,7 @@ def main():
             if cursor_position == point.y:
                 WATCHED_ENDPOINTS.append(point)
                 point.state = ORT_STATE.ACTIVE
+                BEACH_LINE.add(cursor_position, point.y, point.x) # special sauce?
                 global_toggle = True
 
             point.draw()
@@ -256,20 +271,23 @@ def main():
         # a endpoint is connected if I'm being honest
         
         # thesurface second important path of this equation is probably
-        pixel_array = pygame.PixelArray(SCREEN)
-        for point in permanent_points:
-            x_0 = point[0]
-            y_0 = point[1]
 
-
-            pixel_array[x_0][y_0] =  COLOR_RED
-
-        pixel_array.close()
         
-        if len(WATCHED_ENDPOINTS) == 0 and global_toggle:
+        if global_toggle:
+
             for elem in GLOBAL_SET.values():
+                indices_to_remove = []
+                for second_elem in elem:
+                    if elem[0] == second_elem[0]:
+                        indices_to_remove.append(second_elem)
+
+                actual_ones = deepcopy(elem)
+                for second_elem in indices_to_remove:
+                    print("removing duplicate y coordinate")
+                    actual_one.remove(second_elem)
+                
                 if len(elem) > 2:
-                    pygame.draw.lines(SCREEN, COLOR_BLACK, False, elem, width=2)
+                    pygame.draw.lines(SCREEN, COLOR_BLACK, False, actual_ones, width=2)
 
         if len(new_beachline) > 2: 
             pygame.draw.lines(SCREEN, COLOR_GREEN, False, new_beachline)
