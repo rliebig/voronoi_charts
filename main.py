@@ -1,5 +1,6 @@
 import pygame
 import random
+import math
 from pygame.locals import QUIT, KEYDOWN, K_r, K_s, K_ESCAPE
 from pygame import gfxdraw
 
@@ -21,11 +22,13 @@ COLOR_GREY = (90, 90, 90)
 COLOR_WHITE = (255, 255, 255)
 
 
+# pretty high threshold tbh
+TOLERANCE = 0.01
 def find_intersection(first_points, second_points):
     # find intersection in O(n^2)
     for element in first_points:
         for second_element in second_points:
-            if element[0] == second_element[0] and element[1] == second_element[1]:
+            if math.isclose(element[0], second_element[0],rel_tol=TOLERANCE) and math.isclose(element[1], second_element[1],rel_tol=TOLERANCE):
                 return element
 
 
@@ -118,7 +121,8 @@ def main():
         COLORS = [COLOR_RED, COLOR_GREEN,
                   COLOR_BLUE, COLOR_BLACK, COLOR_YELLOW]
         intersections = []
-        for i, j in zip(range(101, 1000, 200), COLORS):
+        for i in range(201, 400, 10):
+            j = COLORS[i % len(COLORS)]
             first_parabola_points = derive_parabola(
                 j, POINTS[0][0], POINTS[0][1], i)
             second_parabola_points = derive_parabola(
