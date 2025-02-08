@@ -2,6 +2,9 @@ import pygame
 import random
 from pygame.locals import QUIT, KEYDOWN, K_r, K_s, K_ESCAPE
 from enum import Enum
+from utilities import COLOR_OFFWHITE, COLOR_RED, COLOR_GREEN, COLOR_BLUE, COLOR_YELLOW, COLOR_GREY, COLOR_BLACK, COLOR_WHITE
+# make local imports verbose
+from .Ort import Ort
 
 import sys
 
@@ -14,30 +17,12 @@ import sys
 
 MOUSE_MODE = False
 
-WINDOW_HEIGHT = 800
+WINDOW_HEIGHT = 800 
 WINDOW_WIDTH = 800
-
-
-COLOR_RED = (125, 0, 1)
-COLOR_GREEN = (5, 125, 6)
-COLOR_BLUE = (4, 57, 115)
-COLOR_YELLOW = (128, 128, 0)
-COLOR_BLACK = (0, 0, 0)
-COLOR_GREY = (90, 90, 90)
-COLOR_WHITE = (255, 255, 255)
-
-def draw_circle_alpha(color, center, radius, alpha):
-    global SCREEN
-
-    target_rect = pygame.Rect(center, (0, 0)).inflate((radius * 2, radius * 2))
-    shape_surf = pygame.Surface(target_rect.size, pygame.SRCALPHA)
-    shape_surf.set_alpha(alpha)
-    pygame.draw.circle(shape_surf, color, (radius, radius), radius)
-    SCREEN.blit(shape_surf, target_rect)
 
 def generate_random_points():
     global POINTS
-    for i in range(10):
+    for i in range(100):
         x = random.randint(1, WINDOW_HEIGHT)
         y = random.randint(1, WINDOW_WIDTH)
         # we should reject points in two close 
@@ -60,34 +45,7 @@ def derive_parabola(x_f, y_f, y_d):
     return local_points
     # pygame.draw.lines(SCREEN, COLOR_GREEN, False, local_points)
 
-class ORT_STATE(Enum):
-    SLEEPING = 0
-    ACTIVE = 1
-    DEAD = 2
 
-class Ort():
-    def __init__(self, x, y, pos):
-        self.x = x
-        self.y = y
-        self.state = ORT_STATE.SLEEPING
-        self.position = pos
-
-    def draw(self):
-        x = self.x
-        y = self.y
-
-        if self.state == ORT_STATE.SLEEPING:
-            draw_circle_alpha(COLOR_BLACK, (x,y), 10, 255)
-        elif self.state == ORT_STATE.ACTIVE:
-            draw_circle_alpha(COLOR_RED, (x,y), 10, 255)
-        elif self.state == ORT_STATE.DEAD:
-            draw_circle_alpha(COLOR_BLUE, (x,y), 10, 255)
-
-GLOBAL_SET = {}
-
-# lets memorize round, when something was added.
-# it is only a true intersection, if it has been
-# added in the same round!
 class Beachline():
     items = []
     collisions = []
@@ -128,24 +86,18 @@ def main():
     SCREEN = pygame.display.set_mode((WINDOW_HEIGHT, WINDOW_WIDTH))
     # CLOCK = pygame.tick.Clock()
 
-    step = 0
-
-    i = 0
     POINTS = []
-    POINTS.append(Ort(200, 300, 0))
-    POINTS.append(Ort(400, 700, 1))
-    POINTS.append(Ort(450, 400, 2))
+    generate_random_points()
 
     BEACH_LINE = Beachline()
     WATCHED_ENDPOINTS = []
+
     permanent_points = []
     cursor_position = 0
     
-    # generate_random_points()
-    global_toggle = False
 
     while True:
-        SCREEN.fill(COLOR_WHITE)
+        SCREEN.fill(COLOR_OFFWHITE)
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
