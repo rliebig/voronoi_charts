@@ -19,6 +19,15 @@ COLOR_BLACK = (0, 0, 0)
 COLOR_GREY = (90, 90, 90)
 COLOR_WHITE = (255, 255, 255)
 
+
+def find_intersection(first_points, second_points):
+    # find intersection in O(n^2)
+    for element in first_points:
+        for second_element in second_points:
+            if element[0] == second_element[0] and element[1] == second_element[1]:
+                return element
+
+
 def draw_circle_alpha(color, center, radius, alpha):
     global SCREEN
 
@@ -31,8 +40,8 @@ def draw_circle_alpha(color, center, radius, alpha):
 
 def update():
     global POINTS
-    for x,y in POINTS:
-        draw_circle_alpha(COLOR_BLACK, (x,y), 10, 255)
+    for x, y in POINTS:
+        draw_circle_alpha(COLOR_BLACK, (x, y), 10, 255)
 
 
 def generate_random_points():
@@ -42,21 +51,23 @@ def generate_random_points():
         y = random.randint(0, WINDOW_WIDTH)
         POINTS.append((x, y))
 
+
 def draw_line(height):
     global SCREEN
     pygame.draw.line(SCREEN, COLOR_RED, (0, height), (WINDOW_WIDTH, height), 2)
 
 
-def derive_parabola(x_f, y_f, y_d):
+def derive_parabola(COLOR, x_f, y_f, y_d):
     global SCREEN
     # a parabola can be considered as a combination of a directrix and focus
     # for the time being, our directix is the cursor position
     local_points = []
     for x in range(0, WINDOW_WIDTH):
-        y = ((x - x_f)**2)/(2*(y_f - y_d)) + ((y_f + y_d)/2) 
+        y = ((x - x_f)**2)/(2*(y_f - y_d)) + ((y_f + y_d)/2)
         local_points.append((x, y))
 
-    pygame.draw.lines(SCREEN, COLOR_GREEN, False, local_points)
+    return local_points
+
 
 def main():
     global SCREEN, CLOCK, WINDOW_HEIGHT, WINDOW_WIDTH, POINTS
@@ -77,7 +88,7 @@ def main():
 
     BEACH_LINE = []
     WATCHED_ENDPOINTS = []
-    
+
     # generate_random_points()
 
     while True:
@@ -97,21 +108,29 @@ def main():
                 elif event.key == K_ESCAPE:
                     sys.exit()
 
-        cursor_position = pygame.mouse.get_pos()[1]
+        # cursor_position = pygame.mouse.get_pos()[1]
         # visualiation basic code
         update()
-        draw_line(cursor_position)
         # actual working of the main part
-        for point in POINTS:
-            if cursor_position == point[1]:
-                WATCHED_ENDPOINTS.append(point)
 
-        for point in WATCHED_ENDPOINTS:
-            if cursor_position != point[1]:
-                derive_parabola(point[0], point[1], cursor_position)
+        COLORS = [COLOR_RED, COLOR_GREEN,
+                  COLOR_BLUE, COLOR_BLACK, COLOR_YELLOW]
+        for i, j in zip(range(101, 1000, 200), COLORS):
+            for point in POINTS:
+                first_parabola_points = derive_parabola(
+                    j, point[0], point[1], i)
+                second_parabola_points = derive_parabola(
+                    j, point[0], point[1], i)
 
+                pygame.draw.lines(SCREEN, COLOR, False, first_parabola_points)
+                pygame.draw.lines(SCREEN, COLOR, False, second_parabola_points)
+
+                intersection = find_intersection(
+                    first_parabola_points, second_parabola_points)
+                circle(SCREEN, COLOR, intersection, 10)
 
         pygame.display.update()
+
 
 if __name__ == "__main__":
     main()
