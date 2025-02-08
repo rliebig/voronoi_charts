@@ -50,7 +50,6 @@ def draw_line(height):
 
 
 def derive_parabola(x_f, y_f, y_d):
-    global SCREEN
     # a parabola can be considered as a combination of a directrix and focus
     local_points = []
     for x in range(0, WINDOW_WIDTH):
@@ -119,6 +118,7 @@ class Beachline():
                 if L == collided[0] and self.items[y][1] == collided[1]:
                     return False
             self.collisions.append([y,x])
+
             elem = self.items[y][1]
             if L < self.items[y][1]:
                 self.collided_wellenstuecke.append([L, self.items[y][1]])
@@ -255,25 +255,20 @@ def main():
         # we should probably remember to which edge
         # a endpoint is connected if I'm being honest
         
-        # the second important path of this equation is probably
-        #for point in permanent_points:
-        #    x_0 = point[0]
-        #    y_0 = point[1]
+        # thesurface second important path of this equation is probably
+        pixel_array = pygame.PixelArray(SCREEN)
+        for point in permanent_points:
+            x_0 = point[0]
+            y_0 = point[1]
 
-        #    rect = pygame.Rect(x_0, y_0, 1, 1)
 
-        #    # hack to draw a pixel
-        #    pygame.draw.rect(SCREEN, COLOR_RED, rect)
+            pixel_array[x_0][y_0] =  COLOR_RED
 
+        pixel_array.close()
         
         if len(WATCHED_ENDPOINTS) == 0 and global_toggle:
-            print("is being performed")
-            print(GLOBAL_SET.values())
             for elem in GLOBAL_SET.values():
                 if len(elem) > 2:
-                    first = elem[0]
-                    last = elem[-1]
-                    print(f"elem {first} {last}")
                     pygame.draw.lines(SCREEN, COLOR_BLACK, False, elem, width=2)
 
         if len(new_beachline) > 2: 
