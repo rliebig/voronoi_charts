@@ -1,6 +1,7 @@
 import pygame
 import random
 from pygame.locals import QUIT, KEYDOWN, K_r, K_s, K_ESCAPE
+from pygame import gfxdraw
 
 import sys
 
@@ -64,7 +65,8 @@ def derive_parabola(COLOR, x_f, y_f, y_d):
     local_points = []
     for x in range(0, WINDOW_WIDTH):
         y = ((x - x_f)**2)/(2*(y_f - y_d)) + ((y_f + y_d)/2)
-        local_points.append((x, y))
+        if x > 0 and y > 0:
+            local_points.append((int(x), int(y)))
 
     return local_points
 
@@ -82,7 +84,7 @@ def main():
     POINTS = []
 
     FOCUS = (200, 100)
-    SECOND_FOCUS = (700, 100)
+    SECOND_FOCUS = (700, 300)
     POINTS.append(FOCUS)
     POINTS.append(SECOND_FOCUS)
 
@@ -115,19 +117,30 @@ def main():
 
         COLORS = [COLOR_RED, COLOR_GREEN,
                   COLOR_BLUE, COLOR_BLACK, COLOR_YELLOW]
+        intersections = []
         for i, j in zip(range(101, 1000, 200), COLORS):
-            for point in POINTS:
-                first_parabola_points = derive_parabola(
-                    j, point[0], point[1], i)
-                second_parabola_points = derive_parabola(
-                    j, point[0], point[1], i)
+            first_parabola_points = derive_parabola(
+                j, POINTS[0][0], POINTS[0][1], i)
+            second_parabola_points = derive_parabola(
+                j, POINTS[1][0], POINTS[1][1], i)
 
-                pygame.draw.lines(SCREEN, COLOR, False, first_parabola_points)
-                pygame.draw.lines(SCREEN, COLOR, False, second_parabola_points)
+            pygame.draw.lines(SCREEN, j, False, first_parabola_points)
+            pygame.draw.lines(SCREEN, j, False, second_parabola_points)
 
-                intersection = find_intersection(
-                    first_parabola_points, second_parabola_points)
-                circle(SCREEN, COLOR, intersection, 10)
+
+            intersection = find_intersection(
+                first_parabola_points, second_parabola_points)
+            if intersection != None:
+                print(intersection)
+                pygame.draw.circle(SCREEN, j, intersection, 5)
+
+                intersections.append(intersection)
+
+        for i, point in enumerate(intersections[:-1]):
+            print(i)
+            print(point)
+            next_point = intersections[i+1]
+            gfxdraw.line(SCREEN, point[0], point[1], next_point[0], next_point[1], COLOR_BLACK);
 
         pygame.display.update()
 
