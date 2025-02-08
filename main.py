@@ -64,6 +64,7 @@ class ORT_STATE(Enum):
     SLEEPING = 0
     ACTIVE = 1
     DEAD = 2
+
 class Ort():
     def __init__(self, x, y, pos):
         self.x = x
@@ -111,29 +112,6 @@ class Beachline():
             self.items[y][1] = L
             return True
 
-        elif self.items[y][1] != L and self.items[y][0] == x and y == y : # true intersection
-            global GLOBAL_SET
-            # ensure only one collision per round! 
-            for collided in self.collided_wellenstuecke:
-                if L == collided[0] and self.items[y][1] == collided[1]:
-                    return False
-            self.collisions.append([y,x])
-
-            elem = self.items[y][1]
-            if L < self.items[y][1]:
-                self.collided_wellenstuecke.append([L, self.items[y][1]])
-                target_string = f"{L}_{elem}"
-            else:
-                self.collided_wellenstuecke.append([self.items[y][1], L])
-                target_string = f"{elem}_{L}"
-
-            if not target_string in GLOBAL_SET:
-                GLOBAL_SET[target_string] = [[y,x]]
-            else:
-                GLOBAL_SET[target_string].append([y,x])
-          
-
-        print(len(self.collisions))
         return False
 
 
@@ -154,9 +132,9 @@ def main():
 
     i = 0
     POINTS = []
-    POINTS.append(Ort(200, 100, 0))
-    POINTS.append(Ort(700, 100, 1))
-    POINTS.append(Ort(400, 50, 2))
+    POINTS.append(Ort(200, 300, 0))
+    POINTS.append(Ort(400, 700, 1))
+    POINTS.append(Ort(450, 400, 2))
 
     BEACH_LINE = Beachline()
     WATCHED_ENDPOINTS = []
@@ -247,29 +225,13 @@ def main():
 
         # copy to plain points list
         new_beachline = BEACH_LINE.collect()
-        for x in collisions:
-            permanent_points.append(x)
-
         BEACH_LINE.reset_collisions()
 
         # we should probably remember to which edge
         # a endpoint is connected if I'm being honest
         
         # thesurface second important path of this equation is probably
-        pixel_array = pygame.PixelArray(SCREEN)
-        for point in permanent_points:
-            x_0 = point[0]
-            y_0 = point[1]
-
-
-            pixel_array[x_0][y_0] =  COLOR_RED
-
-        pixel_array.close()
         
-        if len(WATCHED_ENDPOINTS) == 0 and global_toggle:
-            for elem in GLOBAL_SET.values():
-                if len(elem) > 2:
-                    pygame.draw.lines(SCREEN, COLOR_BLACK, False, elem, width=2)
 
         if len(new_beachline) > 2: 
             pygame.draw.lines(SCREEN, COLOR_GREEN, False, new_beachline)
