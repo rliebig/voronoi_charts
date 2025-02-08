@@ -37,10 +37,12 @@ def draw_circle_alpha(color, center, radius, alpha):
 
 def generate_random_points():
     global POINTS
-    for _ in range(10):
-        x = random.randint(0, WINDOW_HEIGHT)
-        y = random.randint(0, WINDOW_WIDTH)
-        POINTS.append(Ort(x, y))
+    for i in range(10):
+        x = random.randint(1, WINDOW_HEIGHT)
+        y = random.randint(1, WINDOW_WIDTH)
+        # we should reject points in two close 
+        # proximity to each other
+        POINTS.append(Ort(x, y, i))
 
 def draw_line(height):
     global SCREEN
@@ -53,8 +55,7 @@ def derive_parabola(x_f, y_f, y_d):
     local_points = []
     for x in range(0, WINDOW_WIDTH):
         y = ((x - x_f)**2)/(2*(y_f - y_d)) + ((y_f + y_d)/2) 
-        if y > 0:
-            local_points.append((int(x), int(y)))
+        local_points.append((int(x), int(y)))
 
 
     return local_points
@@ -65,10 +66,11 @@ class ORT_STATE(Enum):
     ACTIVE = 1
     DEAD = 2
 class Ort():
-    def __init__(self, x, y):
+    def __init__(self, x, y, pos):
         self.x = x
         self.y = y
         self.state = ORT_STATE.SLEEPING
+        self.position = pos
 
     def draw(self):
         x = self.x
@@ -81,37 +83,68 @@ class Ort():
         elif self.state == ORT_STATE.DEAD:
             draw_circle_alpha(COLOR_BLUE, (x,y), 10, 255)
 
+GLOBAL_SET = {}
+
+# lets memorize round, when something was added.
+# it is only a true intersection, if it has been
+# added in the same round!
 class Beachline():
     items = []
     collisions = []
     def __init__(self, size=WINDOW_WIDTH):
         # initialize empty array
-        self.items = [0 for x in range(WINDOW_WIDTH+1)] 
+        self.items = [[0, 0] for x in range(WINDOW_WIDTH+1)] 
         self.collisions = list()
+        self.collided_wellenstuecke = list()
 
     def reset_collisions(self):
         self.collision = list()
+        self.collided_wellenstuecke = list()
 
-    def add(self, x, y): 
+    def add(self, L, x, y): 
         # always forwards - never backwards!
-        if self.items[y] < x and x < WINDOW_HEIGHT:
-            if x > 0:
-                self.items[y] = x
-                return True
 
-        # elif self.items[y] == x:
-        #    self.collisions.append([y,x])
+        if not x > 0:
+            return
+
+        if self.items[y][0] < x and x < WINDOW_HEIGHT:
+            self.items[y][0] = x
+            self.items[y][1] = L
+            return True
+
+        elif self.items[y][1] != L and self.items[y][0] == x and y == y : # true intersection
+            global GLOBAL_SET
+            # ensure only one collision per round! 
+            for collided in self.collided_wellenstuecke:
+                if L == collided[0] and self.items[y][1] == collided[1]:
+                    return False
+            self.collisions.append([y,x])
+            elem = self.items[y][1]
+            if L < self.items[y][1]:
+                self.collided_wellenstuecke.append([L, self.items[y][1]])
+                target_string = f"{L}_{elem}"
+            else:
+                self.collided_wellenstuecke.append([self.items[y][1], L])
+                target_string = f"{elem}_{L}"
+
+            if not target_string in GLOBAL_SET:
+                GLOBAL_SET[target_string] = [[y,x]]
+            else:
+                GLOBAL_SET[target_string].append([y,x])
+          
+
+        print(len(self.collisions))
         return False
 
 
     def collect(self):
-        return [(x, y) for x,y in enumerate(self.items)]
+        return [(x, y[0]) for x,y in enumerate(self.items)]
 
-    # def get_collisions(self):
-    #     return self.collisions
+    def get_collisions(self):
+        return self.collisions
 
 def main():
-    global SCREEN, CLOCK, WINDOW_HEIGHT, WINDOW_WIDTH, POINTS
+    global SCREEN, CLOCK, WINDOW_HEIGHT, WINDOW_WIDTH, POINTS, GLOBAL_SET
     pygame.init()
     # pygame.font.init()
     SCREEN = pygame.display.set_mode((WINDOW_HEIGHT, WINDOW_WIDTH))
@@ -121,9 +154,9 @@ def main():
 
     i = 0
     POINTS = []
-    POINTS.append(Ort(200, 100))
-    POINTS.append(Ort(700, 100))
-    POINTS.append(Ort(400, 50))
+    POINTS.append(Ort(200, 100, 0))
+    POINTS.append(Ort(700, 100, 1))
+    POINTS.append(Ort(400, 50, 2))
 
     BEACH_LINE = Beachline()
     WATCHED_ENDPOINTS = []
@@ -131,6 +164,7 @@ def main():
     cursor_position = 0
     
     # generate_random_points()
+    global_toggle = False
 
     while True:
         SCREEN.fill(COLOR_WHITE)
@@ -147,6 +181,8 @@ def main():
                     generate_random_points() 
                     permanent_points = []
                     BEACH_LINE = Beachline()
+                    GLOBAL_SET.clear()
+                    # GLOBAL_SET = set() 
                 elif event.key == K_s:
                     if not MOUSE_MODE:
                         cursor_position += 1
@@ -165,6 +201,7 @@ def main():
             if cursor_position == point.y:
                 WATCHED_ENDPOINTS.append(point)
                 point.state = ORT_STATE.ACTIVE
+                global_toggle = True
 
             point.draw()
                 
@@ -172,7 +209,9 @@ def main():
         # lets introduce logic for the spike line 
         rejection_candidates = []
         wellen_stuecke = []
+        BEACH_LINE.reset_collisions()
         for point in WATCHED_ENDPOINTS:
+            position = point.position
             if cursor_position == point.y:
                 # object becomes interesting in a different time frame
                 continue
@@ -183,7 +222,7 @@ def main():
             # we should check for collision right here
             only_rejections = True
             for x in wellen_stueck:
-                not_rejection = BEACH_LINE.add(x[1], x[0])
+                not_rejection = BEACH_LINE.add(position, x[1], x[0])
                 if not_rejection:
                     only_rejections = False 
 
@@ -191,45 +230,11 @@ def main():
             if only_rejections:
                 rejection_candidates.append(point)
 
-        collisions = []
+        collisions = BEACH_LINE.get_collisions()
         new_beachline = BEACH_LINE.collect()
         # well, that did not work out.
         # so, how do we fix this
         # now find all intersections for each pair of wellen_stuecke
-        for index, element in enumerate(wellen_stuecke):
-            # now get all other points
-            other_candidates = list()
-
-            if index == 0:
-                other_candidates = wellen_stuecke[1:]
-            elif index == len(wellen_stuecke) - 1:
-                other_candidates = wellen_stuecke[:-1]
-            else:
-                other_candidates = wellen_stuecke[0:index]
-                for j in wellen_stuecke[index+1:]:
-                 
-                    other_candidates.append(j)
-            # print(f"index = {index}")
-            # print(f"len = {len(other_candidates)}")
-
-            # find intersection!
-            for x in element:
-                for j in other_candidates:
-                    toggle = False
-                    for k in j:
-                        # find only _first_ intersection
-                        if x[0] == k[0] and x[1] == k[1] and x[0] > 0 and x[1] > 0:
-                            # select for intersections on the 
-                            # beachline!
-                            for l,y in new_beachline:
-                                if x[0] == l and x[1] == y:
-                                    collisions.append([x[0], x[1]])
-                            toggle = True
-                            continue
-
-                    if toggle:
-                        continue
-
                  
         for candidate in rejection_candidates:
             print(f"REJECTION {candidate}")
@@ -251,17 +256,25 @@ def main():
         # a endpoint is connected if I'm being honest
         
         # the second important path of this equation is probably
-        for point in permanent_points:
-            print(point)
-            x_0 = point[0]
-            y_0 = point[1]
+        #for point in permanent_points:
+        #    x_0 = point[0]
+        #    y_0 = point[1]
 
-            rect = pygame.Rect(x_0, y_0, 1, 1)
+        #    rect = pygame.Rect(x_0, y_0, 1, 1)
 
-            # hack to draw a pixel
-            pygame.draw.rect(SCREEN, COLOR_RED, rect)
+        #    # hack to draw a pixel
+        #    pygame.draw.rect(SCREEN, COLOR_RED, rect)
 
         
+        if len(WATCHED_ENDPOINTS) == 0 and global_toggle:
+            print("is being performed")
+            print(GLOBAL_SET.values())
+            for elem in GLOBAL_SET.values():
+                if len(elem) > 2:
+                    first = elem[0]
+                    last = elem[-1]
+                    print(f"elem {first} {last}")
+                    pygame.draw.lines(SCREEN, COLOR_BLACK, False, elem, width=2)
 
         if len(new_beachline) > 2: 
             pygame.draw.lines(SCREEN, COLOR_GREEN, False, new_beachline)
