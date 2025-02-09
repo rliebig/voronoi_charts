@@ -1,3 +1,6 @@
+from globals import *
+import pygame
+
 class Parabola():
     """
         This class implements a parabola in
@@ -11,12 +14,11 @@ class Parabola():
     def draw(self, SCREEN, initial_x=0,final_x=WINDOW_WIDTH):
         local_points = []
         for x in range(initial_x, final_x):
-            y = ((x - x_f)**2)/(2*(y_f - y_d)) + ((y_f + y_d)/2)
-            if x > 0 and y > 0:
-                local_points.append((int(x), int(y)))
+            y = ((x - self.x_f)**2)/(2*(self.y_f - self.y_d)) + ((self.y_f + self.y_d)/2)
+            if x > 0 and y > 0: # sometimes points are generated outside the plain...
+                local_points.append((int(x), int(y))) # 
 
-        return local_points
-    
+        pygame.draw.lines(SCREEN, COLOR_GREEN, False, local_points, width=2)    
 
     def convert_to_vertex_focal_length(self):
         """
@@ -41,5 +43,5 @@ def intersect_parabolas(first: Parabola, second: Parabola):
         x_second_squared = second_vertex[1] ** 2
         x_first_squared = first_vertex[1] ** 2
         x = (x_second_squared - x_first_squared) / (2*(second_vertex[1] - first_vertex[1]))
-        y = (((x - first_vertex[1])*(x - first_vertex[1])) / (4 * first_a)) +  
+        y = (((x - first_vertex[1])*(x - first_vertex[1])) / (4 * first_a)) +  second_vertex[1]
         return (x, y)

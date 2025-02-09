@@ -5,29 +5,21 @@ import random
 import math
 from pygame.locals import QUIT, KEYDOWN, K_r, K_s, K_ESCAPE
 from pygame import gfxdraw
+from parabola import Parabola,intersect_parabolas
+from globals import *
 
 import sys
 
 
 # GLOBAL_FONT = pygame.font.SysFont("monospace", 30)
 
-WINDOW_HEIGHT = 800
-WINDOW_WIDTH = 800
-
-
-COLOR_RED = (125, 0, 1)
-COLOR_GREEN = (5, 125, 6)
-COLOR_BLUE = (4, 57, 115)
-COLOR_YELLOW = (128, 128, 0)
-COLOR_BLACK = (0, 0, 0)
-COLOR_GREY = (90, 90, 90)
-COLOR_WHITE = (255, 255, 255)
 
 
 # pretty high threshold tbh
 TOLERANCE = 0.01
 def find_intersection(first_points, second_points):
     # find intersection in O(n^2)
+    # this remains here for comparison purposes
     for element in first_points:
         for second_element in second_points:
             if math.isclose(element[0], second_element[0],rel_tol=TOLERANCE) and math.isclose(element[1], second_element[1],rel_tol=TOLERANCE):
@@ -100,7 +92,11 @@ def main():
 
     # generate_random_points()
 
-    first_parabola = Parabola()
+    current_position = 400
+    first_parabola = Parabola(FOCUS[0], FOCUS[1], current_position)
+    second_parabola = Parabola(SECOND_FOCUS[0], SECOND_FOCUS[1], current_position)
+    intersection = intersect_parabolas(first_parabola, second_parabola)
+    print(intersection)
 
     while True:
         SCREEN.fill(COLOR_WHITE)
@@ -119,9 +115,14 @@ def main():
                 elif event.key == K_ESCAPE:
                     sys.exit()
 
+        draw_circle_alpha(COLOR_BLACK, FOCUS, 3, 240)
+        draw_circle_alpha(COLOR_BLACK, SECOND_FOCUS, 3, 240)
         # cursor_position = pygame.mouse.get_pos()[1]
         # visualiation basic code
-        update()
+        first_parabola.draw(SCREEN)
+        second_parabola.draw(SCREEN)
+
+        draw_circle_alpha(COLOR_RED, intersection, 3, 255)
         # actual working of the main part
 
 
