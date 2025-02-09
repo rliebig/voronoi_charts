@@ -1,4 +1,5 @@
 import pygame
+import math
 import random
 from pygame.locals import QUIT, KEYDOWN, K_r, K_s, K_ESCAPE
 from utilities import COLOR_OFFWHITE, COLOR_RED, COLOR_GREEN, COLOR_BLUE, COLOR_YELLOW, COLOR_GREY, COLOR_BLACK, COLOR_WHITE
@@ -7,7 +8,6 @@ from enum import Enum
 from Ort import Ort, ORT_STATE
 
 import sys
-
 
 # I apologize about the denglish notation. Denglish means
 # a combiniation of english and german words ( Deutsch + Englisch = denglisch)
@@ -39,7 +39,7 @@ def derive_parabola(x_f, y_f, y_d):
     local_points = []
     for x in range(0, WINDOW_WIDTH):
         y = ((x - x_f)**2)/(2*(y_f - y_d)) + ((y_f + y_d)/2) 
-        local_points.append((int(x), int(y)))
+        local_points.append((x, y))
 
 
     return local_points
@@ -64,17 +64,47 @@ class Beachline():
         self.collided_wellenstuecke = list()
 
     def add(self, L, x, y): 
+        global GLOBAL_SET
         # always forwards - never backwards!
 
         if not x > 0:
             return
 
+        toggle = False 
         if self.items[y][0] < x and x < WINDOW_HEIGHT:
             self.items[y][0] = x
             self.items[y][1] = L
-            return True
+            toggle = True
+            try:
+                # lets try finding local minima
+                if (self.items[y+2][0] > x and self.items[y-2][0] > x) or (self.items[y-2][0] < x and self.items[y-2][0] > x):
+                    global GLOBAL_SET, SCREEN
+                    draw_circle_alpha(COLOR_RED, (y,x ), 7, 255)
+                    self.collisions.append([y,x])
+            except Exception as e:
+                print(e)
 
+<<<<<<< HEAD
         return False
+=======
+        # elif self.items[y][1] != L and math.isclose(self.items[y][0], x, rel_tol=1e-05) and y == y: # true intersection
+        # elif self.items[y][0] == x and y == y : # true intersection
+        # ensure only one collision per round! 
+        #for collided in self.collided_wellenstuecke:
+
+        #    if  self.items[y][1] == collided[1]:
+            # if L == collided[0] and self.items[y][1] == collided[1]:
+        #        return False
+
+            #values = GLOBAL_SET[target_string]
+            #for val in values:
+            #    if val[0] == y:
+            #        return False
+          
+
+        print(len(self.collisions))
+        return toggle
+>>>>>>> 51b8fdca4e994b384760a379d3ea30dffbf5c510
 
 
     def collect(self):
@@ -139,6 +169,17 @@ def main():
                     generate_random_points() 
                     permanent_points = []
                     BEACH_LINE = Beachline()
+<<<<<<< HEAD
+=======
+                    GLOBAL_SET.clear()
+                    # GLOBAL_SET = set() 
+                elif event.key == K_t:
+                    cursor_position = 0
+                    WATCHED_ENDPOINTS = []
+                    permanent_points = []
+                    BEACH_LINE = Beachline()
+                    GLOBAL_SET.clear()
+>>>>>>> 51b8fdca4e994b384760a379d3ea30dffbf5c510
                 elif event.key == K_s:
                     if not MOUSE_MODE:
                         cursor_position += 1
@@ -157,6 +198,7 @@ def main():
             if cursor_position == point.y:
                 WATCHED_ENDPOINTS.append(point)
                 point.state = ORT_STATE.ACTIVE
+                BEACH_LINE.add(cursor_position, point.y, point.x) # special sauce?
                 global_toggle = True
 
             point.draw(SCREEN)
@@ -203,13 +245,41 @@ def main():
 
         # copy to plain points list
         new_beachline = BEACH_LINE.collect()
+<<<<<<< HEAD
+=======
+        for x in collisions:
+            permanent_points.append(x)
+
+        for x in permanent_points:
+            SCREEN.set_at((int(x[0]), int(x[1])), COLOR_RED)
+
+>>>>>>> 51b8fdca4e994b384760a379d3ea30dffbf5c510
         BEACH_LINE.reset_collisions()
 
         # we should probably remember to which edge
         # a endpoint is connected if I'm being honest
         
         # thesurface second important path of this equation is probably
+<<<<<<< HEAD
         
+=======
+
+        
+        if global_toggle:
+            for elem in GLOBAL_SET.values():
+                #indices_to_remove = []
+                #for second_elem in elem:
+                #    if elem[0] == second_elem[0]:
+                #        indices_to_remove.append(second_elem)
+
+                #actual_ones = deepcopy(elem)
+                #for second_elem in indices_to_remove:
+                #    print("removing duplicate y coordinate")
+                #    actual_one.remove(second_elem)
+                
+                if len(elem) > 2:
+                    pygame.draw.lines(SCREEN, COLOR_BLACK, False, elem, width=2)
+>>>>>>> 51b8fdca4e994b384760a379d3ea30dffbf5c510
 
         if len(new_beachline) > 2: 
             pygame.draw.lines(SCREEN, COLOR_GREEN, False, new_beachline)
