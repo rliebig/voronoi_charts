@@ -55,7 +55,7 @@ class PointedBeachline():
             return
 
         toggle = False
-        if self.items[y][0] < x and x < WINDOW_HEIGHT:
+        if self.items[y][0] < x and x < WINDOW_HEIGHT and self.items[y][1] < L:
             self.items[y][0] = x
             self.items[y][1] = L
             toggle = True
@@ -78,8 +78,8 @@ class Beachline():
         #
         new_parabola = Parabola(ort.x, ort.y, current_position)
         self.wave_pieces.append(new_parabola)
-        self.wave_pieces.sort(key=lambda x: new_parabola.y_f)
-        
+        self.wave_pieces.sort(key=lambda x: x.x_f)
+
     def draw(self, SCREEN, pointed_beachline, current_position):
         points = []
 
@@ -92,24 +92,27 @@ class Beachline():
         # if len(self.wave_pieces) == 1:
             # self.wave_pieces[0].boundary_left = 0
             # self.wave_pieces[0].boundary_right = WINDOW_WIDTH
-        for i in range(len(self.wave_pieces) - 1):
+        print("===============================")
+        for i in range(0, len(self.wave_pieces) - 1):
             # find current intersections
             current = self.wave_pieces[i]
+            print(f"current i = {i}")
+            print(current)
             # we could extract this from loop
             # for even better performance!
+            print(f"next wavepice i = {i+1}")
             next_wavepiece = self.wave_pieces[i+1]
-            print(current)
             print(next_wavepiece)
             intersection, intersection_two = intersect_parabolas(next_wavepiece, current)
-            print("first intersection")
-            print(intersection)
-            print("second intersection")
-            print(intersection_two)
-
-            points.append(intersection_two)
-            points.append(intersection)
+            # only values inside the grpah
+            if intersection_two[0] > 0 and intersection_two[0] < WINDOW_WIDTH and intersection_two[1] > 0 and intersection_two[1] < WINDOW_WIDTH:
+                points.append(intersection_two)
+            if intersection[0] > 0 and intersection[0] < WINDOW_WIDTH and intersection[1] > 0 and intersection[1] < WINDOW_WIDTH:
+                points.append(intersection)
             # points.append(intersection)
+            # 
         values_to_remove = []
+        rejection_candidates = []
 
         for i in range(len(self.wave_pieces)):
             current = self.wave_pieces[i]
@@ -121,17 +124,15 @@ class Beachline():
                     toggle = True
             if not toggle:
                 values_to_remove.append(current)
+                rejection_candidates.append(Ort(current.x_f, current.y_f, 1))
 
-            
         # implement logic for marking points!
         for value in values_to_remove:
             self.wave_pieces.remove(value)
-            
+        if len(values_to_remove) > 0:
+            self.wave_pieces.sort(key=lambda x: x.x_f)
 
-
-        if len(points) > 2:
-            print(points)
-        return points
+        return points, rejection_candidates
 
 
 
@@ -170,10 +171,14 @@ def main():
     # CLOCK = pygame.tick.Clock()
 
     POINTS = []
-    POINTS.append(Ort(200, 100, 0))
-    POINTS.append(Ort(200, 200, 0))
+    POINTS.append(Ort(100, 200, 0))
+    # POINTS.append(Ort(200, 204, 0))
+    POINTS.append(Ort(300, 200, 0))
+    # POINTS.append(Ort(400, 200, 0))
+    # POINTS.append(Ort(201, 100, 0))
+    POINTS.append(Ort(200, 205, 0))
     POINTS.append(Ort(400, 400, 0))
-    # generate_random_points()
+    #generate_random_points()
 
     BEACH_LINE = Beachline()
     pointed_beachline = PointedBeachline()
@@ -193,17 +198,19 @@ def main():
             elif event.type == KEYDOWN:
                 if event.key == K_r:
                     POINTS = []
+                    generate_random_points()
                     cursor_position = 0
                     WATCHED_ENDPOINTS = []
-                    generate_random_points() 
                     permanent_points = []
                     BEACH_LINE = Beachline()
+                    pointed_beachline = PointedBeachline()
                     # GLOBAL_SET.clear()
                 elif event.key == K_t:
                     cursor_position = 0
                     WATCHED_ENDPOINTS = []
                     permanent_points = []
                     BEACH_LINE = Beachline()
+                    pointed_beachline = PointedBeachline()
                     for point in POINTS:
                         point.state = ORT_STATE.SLEEPING
 
@@ -222,7 +229,6 @@ def main():
         # visualiation basic code
         draw_line(cursor_position)
         # actual working of the main part
-        print(POINTS)
         for point in POINTS:
             if cursor_position - 1 == point.y: # 
 
@@ -240,9 +246,9 @@ def main():
         # so, how do we fix this
         # now find all intersections for each pair of wellen_stuecke
                  
+        result, rejection_candidates = BEACH_LINE.draw(SCREEN, pointed_beachline, cursor_position)
         for candidate in rejection_candidates:
-            print(f"REJECTION {candidate}")
-            WATCHED_ENDPOINTS.remove(candidate)
+            # WATCHED_ENDPOINTS.remove(candidate)
             for point in POINTS:
                 # update main point state for better visualisation
                 if candidate.x == point.x and candidate.y == point.y:
@@ -250,7 +256,6 @@ def main():
             
 
         # copy to plain points list
-        result = BEACH_LINE.draw(SCREEN, pointed_beachline, cursor_position)
         for point in result:
             permanent_points.append(point)
 
@@ -259,9 +264,10 @@ def main():
             pygame.draw.lines(SCREEN, COLOR_GREEN, False, curr, width=2)
 
         # for x in permanent_points:
-        if len(permanent_points) > 2 and len(permanent_points) % 2 == 0:
-            print(permanent_points)
-            pygame.draw.lines(SCREEN, COLOR_RED, False, permanent_points, width=2)
+        if len(permanent_points) > 2:
+            for point in permanent_points:
+                SCREEN.set_at(point, COLOR_RED)
+            # pygame.draw.lines(SCREEN, COLOR_RED, False, permanent_points, width=2)
             # SCREEN.set_at(x[0], COLOR_RED)
       
         pygame.display.update()

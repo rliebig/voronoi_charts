@@ -18,6 +18,9 @@ class Ort():
         self.state = ORT_STATE.SLEEPING
         self.position = pos
 
+    def __str_(self):
+        return f"x = {self.x} y = {self.y}"
+
     def _draw_circle(self, SCREEN, color, coordinates):
         gfxdraw.aacircle(SCREEN, coordinates[0], coordinates[1], CIRCLE_RADIUS, color)
         gfxdraw.filled_circle(SCREEN, coordinates[0], coordinates[1], CIRCLE_RADIUS, color)

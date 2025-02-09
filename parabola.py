@@ -16,7 +16,7 @@ class Parabola():
         self.boundary_right = WINDOW_WIDTH
 
     def __str__(self):
-        return f"WAVEPIECE x_f = {self.x_f} x_y = {self.y_f} y_d = {self.y_d}"
+        return f"WAVEPIECE x_f = {self.x_f} y_f = {self.y_f} y_d = {self.y_d}"
 
     def draw(self, SCREEN):
         local_points = []
@@ -62,7 +62,7 @@ def intersect_parabolas(first: Parabola, second: Parabola):
         x = (x_second_squared - x_first_squared) / (2*(second_vertex[0] - first_vertex[0]))
         y = (((x - first_vertex[0])*(x - first_vertex[0])) / (4 * first_a)) +  second_vertex[1]
 
-        return (x, y)
+        return (int(x), int(y)), (int(x),int(y))
 
     m2, m1, m0 = _coeffs(first_vertex, first_a)
     n2, n1, n0 = _coeffs(second_vertex, second_a)
