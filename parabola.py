@@ -1,4 +1,5 @@
 from globals import *
+import math
 import pygame
 
 class Parabola():
@@ -33,15 +34,31 @@ class Parabola():
         return (p, q), a
 
         
+def _coeffs(vertex, a):
+    return 1/(4*a), (-2*vertex[0])/(4*a), vertex[1] + (vertex[0]*vertex[0]/(4*a))
+
+def solve_quadratics(a,b,c):
+    d = math.sqrt((b*b)-(4*a*c))
+    return (-b+d)/(2*a), (-b-d)/(2*a)
 
 def intersect_parabolas(first: Parabola, second: Parabola):
     first_vertex, first_a = first.convert_to_vertex_focal_length()
     second_vertex, second_a = second.convert_to_vertex_focal_length()
 
     # two vertices on the same point 
-    if first_vertex[0] == second_vertex[0] and first_a == second_a:
-        x_second_squared = second_vertex[1] ** 2
-        x_first_squared = first_vertex[1] ** 2
-        x = (x_second_squared - x_first_squared) / (2*(second_vertex[1] - first_vertex[1]))
-        y = (((x - first_vertex[1])*(x - first_vertex[1])) / (4 * first_a)) +  second_vertex[1]
+    if first_vertex[1] == second_vertex[1] and first_a == second_a:
+        x_second_squared = second_vertex[0] ** 2
+        x_first_squared = first_vertex[0] ** 2
+
+        x = (x_second_squared - x_first_squared) / (2*(second_vertex[0] - first_vertex[0]))
+        y = (((x - first_vertex[0])*(x - first_vertex[0])) / (4 * first_a)) +  second_vertex[1]
+
         return (x, y)
+
+    m2, m1, m0 = _coeffs(first_vertex, first_a)
+    n2, n1, n0 = _coeffs(second_vertex, second_a)
+
+    x1, x2 = solve_quadratics(m2 - n2, m1 - n1, m0 - n0)
+    y1 = (((x1 - first_vertex[0])**2)/(4 * first_a)) + first_vertex[1]
+
+    return (int(x1), int(y1))
