@@ -1,7 +1,7 @@
 import pygame
 import math
 import random
-from pygame.locals import QUIT, KEYDOWN, K_r, K_s, K_ESCAPE
+from pygame.locals import QUIT, KEYDOWN, K_r, K_s, K_ESCAPE, K_t
 from utilities import COLOR_OFFWHITE, COLOR_RED, COLOR_GREEN, COLOR_BLUE, COLOR_YELLOW, COLOR_GREY, COLOR_BLACK, COLOR_WHITE
 from enum import Enum
 # make local imports verbose
@@ -53,22 +53,28 @@ class WavePiece():
         self.following = following
 
 class Beachline():
+    parabolas = []
     items = []
     collisions = []
     def __init__(self, size=WINDOW_WIDTH):
         # initialize empty array
-        self k
+        self.size = size
+        self.items = [[0, 0] for x in range(WINDOW_WIDTH+1)] 
+
 
     def reset_collisions(self):
         self.collision = list()
         self.collided_wellenstuecke = list()
 
+    # add to point structure for detection wavelines which disappear!
+    # there must be a better way to find spike events, but this is
+    # it for now
     def add(self, L, x, y): 
         global GLOBAL_SET
         # always forwards - never backwards!
 
-        if not x > 0:
-            return
+        if not x > 0 or not y > 0 or y > 799:
+            return 
 
         toggle = False 
         if self.items[y][0] < x and x < WINDOW_HEIGHT:
@@ -82,7 +88,7 @@ class Beachline():
                     draw_circle_alpha(COLOR_RED, (y,x ), 7, 255)
                     self.collisions.append([y,x])
             except Exception as e:
-                print(e)
+                pass
 
         # the collision detection code needs improvement...
         return toggle
@@ -115,7 +121,11 @@ class SweepStatusStructure():
     def __init__(self):
         self.events = [] # would correctly be a different structure, but oh well
 
-    def add_event(self):
+    def add_event(self, event):
+        self.events.append(event)
+
+    def process_events(self):
+        pass
 
 
 def main():
@@ -150,13 +160,16 @@ def main():
                     generate_random_points() 
                     permanent_points = []
                     BEACH_LINE = Beachline()
-                    GLOBAL_SET.clear()
+                    # GLOBAL_SET.clear()
                 elif event.key == K_t:
                     cursor_position = 0
                     WATCHED_ENDPOINTS = []
                     permanent_points = []
                     BEACH_LINE = Beachline()
-                    GLOBAL_SET.clear()
+                    for point in POINTS:
+                        point.state = ORT_STATE.SLEEPING
+
+                    # GLOBAL_SET.clear()
                 elif event.key == K_s:
                     if not MOUSE_MODE:
                         cursor_position += 1
@@ -176,7 +189,6 @@ def main():
                 WATCHED_ENDPOINTS.append(point)
                 point.state = ORT_STATE.ACTIVE
                 BEACH_LINE.add(cursor_position, point.y, point.x) # special sauce?
-                global_toggle = True
 
             point.draw(SCREEN)
                 
@@ -234,22 +246,6 @@ def main():
         # a endpoint is connected if I'm being honest
         
         # thesurface second important path of this equation is probably
-
-        
-        if global_toggle:
-            for elem in GLOBAL_SET.values():
-                #indices_to_remove = []
-                #for second_elem in elem:
-                #    if elem[0] == second_elem[0]:
-                #        indices_to_remove.append(second_elem)
-
-                #actual_ones = deepcopy(elem)
-                #for second_elem in indices_to_remove:
-                #    print("removing duplicate y coordinate")
-                #    actual_one.remove(second_elem)
-                
-                if len(elem) > 2:
-                    pygame.draw.lines(SCREEN, COLOR_BLACK, False, elem, width=2)
 
         if len(new_beachline) > 2: 
             pygame.draw.lines(SCREEN, COLOR_GREEN, False, new_beachline)
