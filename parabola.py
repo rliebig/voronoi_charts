@@ -12,14 +12,21 @@ class Parabola():
         self.y_f = float(y_f)
         self.y_d = float(y_d)
 
-    def draw(self, SCREEN, initial_x=0,final_x=WINDOW_WIDTH):
+        self.boundary_left = 0
+        self.boundary_right = WINDOW_WIDTH
+
+    def __str__(self):
+        return f"WAVEPIECE x_f = {self.x_f} x_y = {self.y_f} y_d = {self.y_d}"
+
+    def draw(self, SCREEN):
         local_points = []
-        for x in range(initial_x, final_x):
+        for x in range(self.boundary_left, self.boundary_right):
             y = ((x - self.x_f)**2)/(2*(self.y_f - self.y_d)) + ((self.y_f + self.y_d)/2)
             if x > 0 and y > 0: # sometimes points are generated outside the plain...
                 local_points.append((int(x), int(y))) # 
 
-        pygame.draw.lines(SCREEN, COLOR_GREEN, False, local_points, width=2)    
+        if len(local_points) > 2:
+            pygame.draw.lines(SCREEN, COLOR_GREEN, False, local_points, width=2)    
 
     def convert_to_vertex_focal_length(self):
         """
