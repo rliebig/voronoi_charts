@@ -84,27 +84,8 @@ class Beachline():
             except Exception as e:
                 print(e)
 
-<<<<<<< HEAD
-        return False
-=======
-        # elif self.items[y][1] != L and math.isclose(self.items[y][0], x, rel_tol=1e-05) and y == y: # true intersection
-        # elif self.items[y][0] == x and y == y : # true intersection
-        # ensure only one collision per round! 
-        #for collided in self.collided_wellenstuecke:
-
-        #    if  self.items[y][1] == collided[1]:
-            # if L == collided[0] and self.items[y][1] == collided[1]:
-        #        return False
-
-            #values = GLOBAL_SET[target_string]
-            #for val in values:
-            #    if val[0] == y:
-            #        return False
-          
-
-        print(len(self.collisions))
+        # the collision detection code needs improvement...
         return toggle
->>>>>>> 51b8fdca4e994b384760a379d3ea30dffbf5c510
 
 
     def collect(self):
@@ -169,17 +150,13 @@ def main():
                     generate_random_points() 
                     permanent_points = []
                     BEACH_LINE = Beachline()
-<<<<<<< HEAD
-=======
                     GLOBAL_SET.clear()
-                    # GLOBAL_SET = set() 
                 elif event.key == K_t:
                     cursor_position = 0
                     WATCHED_ENDPOINTS = []
                     permanent_points = []
                     BEACH_LINE = Beachline()
                     GLOBAL_SET.clear()
->>>>>>> 51b8fdca4e994b384760a379d3ea30dffbf5c510
                 elif event.key == K_s:
                     if not MOUSE_MODE:
                         cursor_position += 1
@@ -245,24 +222,18 @@ def main():
 
         # copy to plain points list
         new_beachline = BEACH_LINE.collect()
-<<<<<<< HEAD
-=======
         for x in collisions:
             permanent_points.append(x)
 
         for x in permanent_points:
             SCREEN.set_at((int(x[0]), int(x[1])), COLOR_RED)
 
->>>>>>> 51b8fdca4e994b384760a379d3ea30dffbf5c510
         BEACH_LINE.reset_collisions()
 
         # we should probably remember to which edge
         # a endpoint is connected if I'm being honest
         
         # thesurface second important path of this equation is probably
-<<<<<<< HEAD
-        
-=======
 
         
         if global_toggle:
@@ -279,7 +250,6 @@ def main():
                 
                 if len(elem) > 2:
                     pygame.draw.lines(SCREEN, COLOR_BLACK, False, elem, width=2)
->>>>>>> 51b8fdca4e994b384760a379d3ea30dffbf5c510
 
         if len(new_beachline) > 2: 
             pygame.draw.lines(SCREEN, COLOR_GREEN, False, new_beachline)
