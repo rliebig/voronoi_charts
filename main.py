@@ -23,7 +23,7 @@ WINDOW_WIDTH = 800
 
 def generate_random_points():
     global POINTS
-    for i in range(2):
+    for i in range(20):
         x = random.randint(1, WINDOW_HEIGHT)
         y = random.randint(1, WINDOW_WIDTH)
         # we should reject points in two close 
@@ -45,7 +45,26 @@ def derive_parabola(x_f, y_f, y_d):
 
     return local_points
     # pygame.draw.lines(SCREEN, COLOR_GREEN, False, local_points)
+    #
+class PointedBeachline():
+    def __init__(self, size=WINDOW_WIDTH):
+        self.items = [[0,0] for x in range(WINDOW_WIDTH + 1)]
 
+    def add(self, L, x, y):
+        if not x > 0 or not y > 0 or y > 799:
+            return
+
+        toggle = False
+        if self.items[y][0] < x and x < WINDOW_HEIGHT:
+            self.items[y][0] = x
+            self.items[y][1] = L
+            toggle = True
+
+        return toggle
+
+    def collect(self):
+        return [(x, y[0]) for x,y in enumerate(self.items)]
+     
 class Beachline():
     wave_pieces = []
     def __init__(self, size=WINDOW_WIDTH):
@@ -59,43 +78,59 @@ class Beachline():
         #
         new_parabola = Parabola(ort.x, ort.y, current_position)
         self.wave_pieces.append(new_parabola)
-        self.wave_pieces.sort(key=lambda x: new_parabola.x_f)
-
+        self.wave_pieces.sort(key=lambda x: new_parabola.y_f)
         
-    def draw(self, SCREEN, current_position):
+    def draw(self, SCREEN, pointed_beachline, current_position):
         points = []
 
         for wave_piece in self.wave_pieces:
             wave_piece.y_d = current_position
 
-        if len(self.wave_pieces) > 1:
-            self.wave_pieces[-1].boundary_right = WINDOW_WIDTH
+        # if len(self.wave_pieces) > 1:
+            # self.wave_pieces[-1].boundary_right = WINDOW_WIDTH
 
-        if len(self.wave_pieces) == 1:
-            self.wave_pieces[0].boundary_left = 0
-            self.wave_pieces[0].boundary_right = WINDOW_WIDTH
-        else:
-            for i in range(len(self.wave_pieces)- 1):
-                # find current intersections
-                current = self.wave_pieces[i]
-                # we could extract this from loop
-                # for even better performance!
-                next_wavepiece = self.wave_pieces[i+1]
-                print(current)
-                print(next_wavepiece)
-                intersection, intersection_two = intersect_parabolas(next_wavepiece, current)
-                # current.boundary_left = 0
-                # LINKS-Rechts test?
-                current.boundary_right = intersection_two[0]
-                next_wavepiece.boundary_left = intersection_two[0]
+        # if len(self.wave_pieces) == 1:
+            # self.wave_pieces[0].boundary_left = 0
+            # self.wave_pieces[0].boundary_right = WINDOW_WIDTH
+        for i in range(len(self.wave_pieces) - 1):
+            # find current intersections
+            current = self.wave_pieces[i]
+            # we could extract this from loop
+            # for even better performance!
+            next_wavepiece = self.wave_pieces[i+1]
+            print(current)
+            print(next_wavepiece)
+            intersection, intersection_two = intersect_parabolas(next_wavepiece, current)
+            print("first intersection")
+            print(intersection)
+            print("second intersection")
+            print(intersection_two)
 
-                points.append(intersection_two)
-                points.append(intersection)
+            points.append(intersection_two)
+            points.append(intersection)
+            # points.append(intersection)
+        values_to_remove = []
 
         for i in range(len(self.wave_pieces)):
             current = self.wave_pieces[i]
-            current.draw(SCREEN)
+            sec_points = current.draw(SCREEN)
+            toggle = False
+            for point in sec_points:
+                value = pointed_beachline.add(current_position, point[1], point[0])
+                if value:
+                    toggle = True
+            if not toggle:
+                values_to_remove.append(current)
 
+            
+        # implement logic for marking points!
+        for value in values_to_remove:
+            self.wave_pieces.remove(value)
+            
+
+
+        if len(points) > 2:
+            print(points)
         return points
 
 
@@ -137,9 +172,11 @@ def main():
     POINTS = []
     POINTS.append(Ort(200, 100, 0))
     POINTS.append(Ort(200, 200, 0))
-    #generate_random_points()
+    POINTS.append(Ort(400, 400, 0))
+    # generate_random_points()
 
     BEACH_LINE = Beachline()
+    pointed_beachline = PointedBeachline()
     WATCHED_ENDPOINTS = []
 
     permanent_points = []
@@ -213,15 +250,19 @@ def main():
             
 
         # copy to plain points list
-        result = BEACH_LINE.draw(SCREEN, cursor_position)
+        result = BEACH_LINE.draw(SCREEN, pointed_beachline, cursor_position)
         for point in result:
-            print(point)
-            permanent_points.append(result)
+            permanent_points.append(point)
 
-        for x in permanent_points:
-            print(x)
-            print(len(x))
-            SCREEN.set_at(x[0], COLOR_RED)
+        curr = pointed_beachline.collect()
+        if len(curr) > 0:
+            pygame.draw.lines(SCREEN, COLOR_GREEN, False, curr, width=2)
+
+        # for x in permanent_points:
+        if len(permanent_points) > 2 and len(permanent_points) % 2 == 0:
+            print(permanent_points)
+            pygame.draw.lines(SCREEN, COLOR_RED, False, permanent_points, width=2)
+            # SCREEN.set_at(x[0], COLOR_RED)
       
         pygame.display.update()
 

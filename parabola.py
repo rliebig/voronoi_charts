@@ -25,8 +25,10 @@ class Parabola():
             if x > 0 and y > 0: # sometimes points are generated outside the plain...
                 local_points.append((int(x), int(y))) # 
 
-        if len(local_points) > 2:
-            pygame.draw.lines(SCREEN, COLOR_GREEN, False, local_points, width=2)    
+        # if len(local_points) > 2:
+            # pygame.draw.lines(SCREEN, COLOR_GREEN, False, local_points, width=2)    
+
+        return local_points
 
     def convert_to_vertex_focal_length(self):
         """
