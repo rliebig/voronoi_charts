@@ -8,9 +8,9 @@ class Parabola():
         focal/directrix format
     """
     def __init__(self, x_f, y_f, y_d):
-        self.x_f = x_f
-        self.y_f = y_f
-        self.y_d = y_d
+        self.x_f = float(x_f)
+        self.y_f = float(y_f)
+        self.y_d = float(y_d)
 
     def draw(self, SCREEN, initial_x=0,final_x=WINDOW_WIDTH):
         local_points = []
@@ -28,9 +28,9 @@ class Parabola():
            This is being used for the intersection.
            You know this representation form math class!
         """
-        p = self.x_f
-        q = (self.y_f + self.y_d) / 2
-        a = (self.y_f - self.y_d) / 2
+        p = float(self.x_f)
+        q = (float(self.y_f) + float(self.y_d)) / 2
+        a = (float(self.y_f) - float(self.y_d)) / 2
         return (p, q), a
 
         
@@ -60,5 +60,6 @@ def intersect_parabolas(first: Parabola, second: Parabola):
 
     x1, x2 = solve_quadratics(m2 - n2, m1 - n1, m0 - n0)
     y1 = (((x1 - first_vertex[0])**2)/(4 * first_a)) + first_vertex[1]
+    y2 = (((x2 - first_vertex[0])**2)/(4 * first_a)) + first_vertex[1]
 
-    return (int(x1), int(y1))
+    return (int(x1), int(y1)), (int(x2), int(y2))

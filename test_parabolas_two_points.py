@@ -69,9 +69,10 @@ def main():
     first_parabola = Parabola(FOCUS[0], FOCUS[1], 500)
     second_parabola = Parabola(SECOND_FOCUS[0], SECOND_FOCUS[1], 500)
 
-    intersection = intersect_parabolas(first_parabola, second_parabola)
+    intersection, second_intersection = intersect_parabolas(first_parabola, second_parabola)
 
     print(intersection)
+    print(second_intersection)
 
     while True:
         SCREEN.fill(COLOR_WHITE)
@@ -93,6 +94,7 @@ def main():
         second_parabola.draw(SCREEN)
 
         draw_circle_alpha(COLOR_RED, intersection, 5, 255)
+        draw_circle_alpha(COLOR_RED, second_intersection, 5, 255)
 
         pygame.display.update()
 
