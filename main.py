@@ -32,6 +32,10 @@ def find_intersection(first_points, second_points):
                 return element
 
 
+def find_intersection_parabola(x_f_1, y_f_1, y_d_1, x_f_2, y_f_2, y_d_2):
+    # lets try a math approach instead of bruteforcing both circles
+    pass
+
 def draw_circle_alpha(color, center, radius, alpha):
     global SCREEN
 
@@ -121,7 +125,7 @@ def main():
         COLORS = [COLOR_RED, COLOR_GREEN,
                   COLOR_BLUE, COLOR_BLACK, COLOR_YELLOW]
         intersections = []
-        for i in range(201, 400, 10):
+        for i in range(201, 1600, 5):
             j = COLORS[i % len(COLORS)]
             first_parabola_points = derive_parabola(
                 j, POINTS[0][0], POINTS[0][1], i)
